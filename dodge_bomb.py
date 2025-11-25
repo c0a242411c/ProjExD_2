@@ -1,6 +1,7 @@
 import os
 import random
 import sys
+import time
 import pygame as pg
 
 
@@ -30,6 +31,27 @@ def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
     return yoko, tate
 
 
+def gameover(screen: pg.Surface) -> None:
+    """
+    こうかとんに爆弾が着弾した際に、画面をブラックアウトし、
+    泣いてるこうかとん画像と
+    「Game Over」の文字列を5秒間表示させる
+    """
+    bg = pg.Surface((WIDTH, HEIGHT)) # 黒い背景
+    bg.fill((0,0,0))
+    bg.set_alpha(200) # 透過度
+    screen.blit(bg,[0,0])
+    fonto = pg.font.Font(None, 80) # 文字設定
+    txt = fonto.render("Game Over", True, (255, 255, 255))
+    txt_rct = txt.get_rect(center = (WIDTH//2, HEIGHT//2))
+    screen.blit(txt, txt_rct)
+    kk_img = pg.image.load("fig/8.png") # こうかとんを左右に設定
+    screen.blit(kk_img, [txt_rct.left - 70, txt_rct.top - 10]) # 左のこうかとん
+    screen.blit(kk_img, [txt_rct.right + 20, txt_rct.top - 10]) # 右のこうかとん
+    pg.display.update()
+    time.sleep(5)
+    
+
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
     screen = pg.display.set_mode((WIDTH, HEIGHT))
@@ -51,8 +73,8 @@ def main():
                 return
             
         if kk_rct.colliderect(bb_rct):
-            print("=== Game Orver ===")
-            return
+            gameover(screen)
+            return 
         
         screen.blit(bg_img, [0, 0]) 
 
