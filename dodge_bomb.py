@@ -1,12 +1,12 @@
 import os
-import sys
 import random
+import sys
 import pygame as pg
 
 
 
 WIDTH, HEIGHT = 1100, 650
-DELTA={
+DELTA = {
     pg.K_UP:(0,-5),
     pg.K_DOWN:(0,+5),
     pg.K_LEFT:(-5,0),
@@ -16,7 +16,12 @@ DELTA={
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
 
-def check_bound(rct: pg.Rect):
+def check_bound(rct: pg.Rect) -> tuple[bool, bool]:
+    """
+    引数：こうかとんRectまたは爆弾Rect
+    戻り値：判定結果タプル（横方向，縦方向）
+    画面内ならTrue，画面外ならFalse
+    """
     yoko, tate = True, True
     if rct.left < 0 or WIDTH < rct.right: # 横のチェック
         yoko = False
@@ -44,6 +49,11 @@ def main():
         for event in pg.event.get():
             if event.type == pg.QUIT: 
                 return
+            
+        if kk_rct.colliderect(bb_rct):
+            print("=== Game Orver ===")
+            return
+        
         screen.blit(bg_img, [0, 0]) 
 
         key_lst = pg.key.get_pressed()
