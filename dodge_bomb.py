@@ -5,7 +5,6 @@ import time
 import pygame as pg
 
 
-
 WIDTH, HEIGHT = 1100, 650
 DELTA = {
     pg.K_UP:(0,-5),
