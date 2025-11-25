@@ -41,16 +41,33 @@ def gameover(screen: pg.Surface) -> None:
     bg.fill((0,0,0))
     bg.set_alpha(200) # 透過度
     screen.blit(bg,[0,0])
+
     fonto = pg.font.Font(None, 80) # 文字設定
     txt = fonto.render("Game Over", True, (255, 255, 255))
     txt_rct = txt.get_rect(center = (WIDTH//2, HEIGHT//2))
     screen.blit(txt, txt_rct)
+
     kk_img = pg.image.load("fig/8.png") # こうかとんを左右に設定
     screen.blit(kk_img, [txt_rct.left - 70, txt_rct.top - 10]) # 左のこうかとん
     screen.blit(kk_img, [txt_rct.right + 20, txt_rct.top - 10]) # 右のこうかとん
     pg.display.update()
     time.sleep(5)
     
+
+# 爆弾が拡大、加速する定義
+def init_bb_imgs() -> tuple[list[pg.Surface], list[int]]:
+    """
+    無限に拡大、加速するのはおかしいので、10段階程度の大きさを変えた爆弾surfaceのリストと加速度のリストを準備する
+    """
+    bb_imgs = []
+    for r in range(1,11):
+        bb_img = pg.Surface((20*r, 20*r))
+        pg.draw.circle(bb_img, (255,0,0), (10*r,10*r), 10*r)
+        bb_img.set_colorkey((0,0,0)) # 四隅を透過
+        bb_imgs.append(bb_img)
+    bb_accs = [a for a in range(1,11)]
+    return bb_imgs, bb_accs
+
 
 def main():
     pg.display.set_caption("逃げろ！こうかとん")
@@ -67,6 +84,9 @@ def main():
     vx, vy = +5, +5 # 爆弾の縦と横の速度
     clock = pg.time.Clock()
     tmr = 0
+
+    bb_imgs, bb_accs = init_bb_imgs() # 2つのリストを取得
+
     while True:
         for event in pg.event.get():
             if event.type == pg.QUIT: 
@@ -101,8 +121,15 @@ def main():
             vx *= -1
         if not tate:
             vy *= -1
-        bb_rct.move_ip(vx,vy)
+
+        avx = vx*bb_accs[min(tmr//500, 9)] # while文の中でtmrの値に応じて，リストから適切な要素を選択する
+        avy = vy*bb_accs[min(tmr//500, 9)]
+        bb_img = bb_imgs[min(tmr//500, 9)]
+        bb_rct.width = bb_img.get_rect().width # Surfaceの大きさが変わった場合は，Rectのwidth属性とheight属性を更新する
+        bb_rct.height = bb_img.get_rect().height
+        bb_rct.move_ip(avx,avy) # avxとavyをmove_ipメソッドに渡す
         screen.blit(bb_img, bb_rct)
+
         pg.display.update()
         tmr += 1
         clock.tick(50)
